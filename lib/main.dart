@@ -27,11 +27,14 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var selectedPageIndex = 0;
+  var todos = [];
 }
 
 class TodoPage extends StatelessWidget {
   @override 
   Widget build(BuildContext context) {
+
+    var appState = context.watch<MyAppState>();
 
     void addNewTodo() {
 
@@ -48,7 +51,7 @@ class TodoPage extends StatelessWidget {
                 SizedBox(
                   width: 200,
                   child: TextFormField(
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   hintText: 'Write your new TODO',
                                 ),
@@ -57,13 +60,28 @@ class TodoPage extends StatelessWidget {
                 const SizedBox(
                   width: 10,
                 ),
-                OutlinedButton(
+                ElevatedButton(
                   onPressed: addNewTodo, 
-                  child: Text('Add'),
+                  child: const Text('Add'),
                 )
               ],
             ),
-          )
+          ),
+          ListView( // after adding this widget bug occured
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text('You have '
+                    '${appState.todos.length} TODOs:'),
+              ),
+              if (appState.todos.isNotEmpty)
+                for (var cur in appState.todos)
+                  ListTile(
+                    leading: const Icon(Icons.today),
+                    title: Text(cur),
+                  ),
+            ],
+          ),
         ]
       ),
     );
