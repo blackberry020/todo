@@ -29,6 +29,7 @@ class MyAppState extends ChangeNotifier {
   var selectedPageIndex = 0;
   Set<dynamic> todos = {};
   TextEditingController newTodoController = TextEditingController();
+  bool isDarkTheme = false;
 
   void addNewTodo() {
 
@@ -39,6 +40,12 @@ class MyAppState extends ChangeNotifier {
     }
 
     newTodoController.clear();
+    notifyListeners();
+  }
+
+  void themeChanged(bool theme) {
+    isDarkTheme = theme;
+    theme ? ThemeData.dark() : ThemeData.light();
     notifyListeners();
   }
 }
@@ -101,6 +108,26 @@ class TodoPage extends StatelessWidget {
   }
 }
 
+class SettingsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+
+    var appState = context.watch<MyAppState>();
+
+    return Scaffold(
+      body: 
+        SafeArea(
+          child: Switch(
+           value: appState.isDarkTheme,
+           onChanged: (val) {
+             appState.themeChanged(val);
+           },
+         ),
+        ),
+    );
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -108,7 +135,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  final pages = [TodoPage(), const Placeholder()];
+  final pages = [TodoPage(), const Placeholder(), SettingsPage()];
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +156,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.done), 
-                        label: Text('done')
+                        label: Text('Done')
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.settings), 
+                        label: Text('Settings')
                       ),
                     ], 
                     selectedIndex: appState.selectedPageIndex,
