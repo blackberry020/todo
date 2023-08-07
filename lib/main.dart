@@ -33,15 +33,36 @@ class TodoPage extends StatelessWidget {
   @override 
   Widget build(BuildContext context) {
 
+    void addNewTodo() {
+
+    }
+
     return Scaffold(
       body: Column(
         children: [
-          Row(
-            children: [
-              /*TextFormField(
-                
-              )*/
-            ],
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 200,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Write your new TODO',
+                                ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                OutlinedButton(
+                  onPressed: addNewTodo, 
+                  child: Text('Add'),
+                )
+              ],
+            ),
           )
         ]
       ),
@@ -78,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               SafeArea(
                 child: NavigationRail(
-                  //extended: constraints.maxWidth >= 500,
+                  extended: constraints.maxWidth >= 500,
                   destinations: const [
                     NavigationRailDestination(
                       icon: Icon(Icons.today), 
