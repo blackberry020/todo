@@ -28,6 +28,12 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   var selectedPageIndex = 0;
   var todos = [];
+  TextEditingController newTodoController = TextEditingController();
+
+  void addNewTodo() {
+    todos.add(newTodoController.text);
+    notifyListeners();
+  }
 }
 
 class TodoPage extends StatelessWidget {
@@ -35,10 +41,6 @@ class TodoPage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     var appState = context.watch<MyAppState>();
-
-    void addNewTodo() {
-
-    }
 
     return Scaffold(
       body: Column(
@@ -51,6 +53,7 @@ class TodoPage extends StatelessWidget {
                 SizedBox(
                   width: 200,
                   child: TextFormField(
+                    controller: appState.newTodoController,
                     decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   hintText: 'Write your new TODO',
@@ -61,7 +64,7 @@ class TodoPage extends StatelessWidget {
                   width: 10,
                 ),
                 ElevatedButton(
-                  onPressed: addNewTodo, 
+                  onPressed: appState.addNewTodo, 
                   child: const Text('Add'),
                 )
               ],
