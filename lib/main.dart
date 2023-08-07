@@ -67,20 +67,23 @@ class TodoPage extends StatelessWidget {
               ],
             ),
           ),
-          ListView( // after adding this widget bug occured
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text('You have '
-                    '${appState.todos.length} TODOs:'),
-              ),
-              if (appState.todos.isNotEmpty)
-                for (var cur in appState.todos)
-                  ListTile(
-                    leading: const Icon(Icons.today),
-                    title: Text(cur),
-                  ),
-            ],
+          SizedBox(
+            height: 300,
+            child: ListView( // after adding this widget bug occured
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text('You have '
+                      '${appState.todos.length} TODOs:', textAlign: TextAlign.center,),
+                ),
+                if (appState.todos.isNotEmpty)
+                  for (var cur in appState.todos)
+                    ListTile(
+                      leading: const Icon(Icons.today),
+                      title: Text(cur),
+                    ),
+              ],
+            ),
           ),
         ]
       ),
