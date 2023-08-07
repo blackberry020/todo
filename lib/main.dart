@@ -27,11 +27,12 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var selectedPageIndex = 0;
-  var todos = [];
+  Set<dynamic> todos = {};
   TextEditingController newTodoController = TextEditingController();
 
   void addNewTodo() {
     todos.add(newTodoController.text);
+    newTodoController.clear();
     notifyListeners();
   }
 }
