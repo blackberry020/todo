@@ -31,7 +31,13 @@ class MyAppState extends ChangeNotifier {
   TextEditingController newTodoController = TextEditingController();
 
   void addNewTodo() {
-    todos.add(newTodoController.text);
+
+    var todoToAdd = newTodoController.text.trim();
+
+    if (todoToAdd != "") {
+      todos.add(todoToAdd);
+    }
+
     newTodoController.clear();
     notifyListeners();
   }
@@ -73,7 +79,7 @@ class TodoPage extends StatelessWidget {
           ),
           SizedBox(
             height: 300,
-            child: ListView( // after adding this widget bug occured
+            child: ListView(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(20),
@@ -101,58 +107,50 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  final pages = [TodoPage(), const Placeholder()];
+
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    late Widget page;
 
-    switch (appState.selectedPageIndex) {
-      case 0:
-        page = TodoPage();
-        break;
-      case 1:
-        page = Placeholder();
-        break;
-      default:
-        throw ("there is no such page for $appState.selectedPageIndex");
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Scaffold(
-          body: Row(
-            children: [
-              SafeArea(
-                child: NavigationRail(
-                  extended: constraints.maxWidth >= 500,
-                  destinations: const [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.today), 
-                      label: Text('TODO')
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.done), 
-                      label: Text('done')
-                    ),
-                  ], 
-                  selectedIndex: appState.selectedPageIndex,
-                  onDestinationSelected: (int newIndex) {
-                    setState(() {
-                      appState.selectedPageIndex = newIndex;
-                    });
-                  },
-                  backgroundColor: const Color.fromARGB(255, 116, 237, 108),
-                )
-              ),
-              Expanded(
-                child: Container(
-                            child: page,
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Scaffold(
+            body: Row(
+              children: [
+                  NavigationRail(
+                    extended: constraints.maxWidth >= 500,
+                    destinations: const [
+                      NavigationRailDestination(
+                        icon: Icon(Icons.today), 
+                        label: Text('TODO')
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.done), 
+                        label: Text('done')
+                      ),
+                    ], 
+                    selectedIndex: appState.selectedPageIndex,
+                    onDestinationSelected: (int newIndex) {
+                      setState(() {
+                        appState.selectedPageIndex = newIndex;
+                        if (newIndex >= pages.length) throw "there is no page for $newIndex";
+                      });
+                    },
+                    backgroundColor: const Color.fromARGB(255, 116, 237, 108),
+                  ),
+                Expanded(
+                  child: Container(
+                            child: pages[appState.selectedPageIndex],
                           )
               ),
-            ],
-          ),
-        );
-      }
+              ],
+            ),
+          );
+        }
+      ),
     );
   }
 }
