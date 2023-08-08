@@ -12,14 +12,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Todo app',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
-        ),
-        home: MyHomePage(),
-        debugShowCheckedModeBanner: false,
+      child: Builder(
+        builder: (context) {
+          return MaterialApp(
+            title: 'Todo app',
+            theme: ThemeData(
+              useMaterial3: true,
+              colorScheme: context.watch<MyAppState>().isDarkTheme ? ColorScheme.dark() : ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 18, 211, 44)),
+            ),
+            home: MyHomePage(),
+            debugShowCheckedModeBanner: false,
+          );
+        }
       ),
     );
   }
@@ -72,6 +76,9 @@ class TodoPage extends StatelessWidget {
                                   border: OutlineInputBorder(),
                                   hintText: 'Write your new TODO',
                                 ),
+                    onFieldSubmitted: (String? todoToAdd) {
+                      appState.addNewTodo();
+                    },
                   ),
                 ),
                 const SizedBox(
@@ -170,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         if (newIndex >= pages.length) throw "there is no page for $newIndex";
                       });
                     },
-                    backgroundColor: const Color.fromARGB(255, 116, 237, 108),
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                   ),
                 Expanded(
                   child: Container(
