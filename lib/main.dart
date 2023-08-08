@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
             title: 'Todo app',
             theme: ThemeData(
               useMaterial3: true,
-              colorScheme: context.watch<MyAppState>().isDarkTheme ? ColorScheme.dark() : ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 18, 211, 44)),
+              colorScheme: context.watch<MyAppState>().isDarkTheme ? const ColorScheme.dark() : ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 18, 211, 44))
             ),
             home: MyHomePage(),
             debugShowCheckedModeBanner: false,
@@ -124,12 +124,24 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       body: 
         SafeArea(
-          child: Switch(
-           value: appState.isDarkTheme,
-           onChanged: (val) {
-             appState.themeChanged(val);
-           },
-         ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Text(
+                  'Dark theme',
+                   style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 10),
+                Switch(
+                 value: appState.isDarkTheme,
+                 onChanged: (val) {
+                   appState.themeChanged(val);
+                 },
+                   ),
+              ],
+            ),
+          ),
         ),
     );
   }
