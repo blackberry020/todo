@@ -54,6 +54,44 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
+class Todo extends StatelessWidget {
+
+  late String todo;
+
+  Todo(String _todo) {
+    todo = _todo;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    void moveToDone() {
+      
+    }
+
+    void deleteTodo() {
+      
+    }
+
+    return Row(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.today),
+            title: Text(todo),
+          ),
+          IconButton(
+            onPressed: moveToDone, 
+            icon: Icon(Icons.done),
+          ),
+          IconButton(
+            onPressed: deleteTodo, 
+            icon: Icon(Icons.delete),
+          ),
+        ],
+      );
+  }
+}
+
 class TodoPage extends StatelessWidget {
   @override 
   Widget build(BuildContext context) {
@@ -138,7 +176,7 @@ class SettingsPage extends StatelessWidget {
                  onChanged: (val) {
                    appState.themeChanged(val);
                  },
-                   ),
+                ),
               ],
             ),
           ),
