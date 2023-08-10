@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   var selectedPageIndex = 0;
   Set<dynamic> todos = {};
+  Set<dynamic> done = {};
   TextEditingController newTodoController = TextEditingController();
   bool isDarkTheme = false;
 
@@ -56,34 +57,44 @@ class MyAppState extends ChangeNotifier {
 class Todo extends StatelessWidget {
   final String todo;
 
-  const Todo({required this.todo});
+  Todo(
+      {required this.todo, required this.deleteTodo, required this.moveToDone});
 
-  void moveToDone() {}
+  final void Function() moveToDone;
 
-  void deleteTodo() {}
+  final void Function() deleteTodo;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: const Icon(Icons.today),
+        leading:
+            const Icon(Icons.today, color: Color.fromARGB(255, 0, 94, 255)),
         title: Text(todo),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
               onPressed: moveToDone,
-              icon: const Icon(Icons.done),
+              icon: const Icon(
+                Icons.done,
+                color: Colors.green,
+              ),
             ),
             IconButton(
               onPressed: deleteTodo,
-              icon: const Icon(Icons.delete),
+              icon: const Icon(Icons.delete, color: Colors.red),
             ),
           ],
         ));
   }
 }
 
-class TodoPage extends StatelessWidget {
+class TodoPage extends StatefulWidget {
+  @override
+  State<TodoPage> createState() => _TodoPageState();
+}
+
+class _TodoPageState extends State<TodoPage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
@@ -118,29 +129,67 @@ class TodoPage extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(
-          height: 300,
-          child: ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  'You have '
-                  '${appState.todos.length} TODOs:',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              if (appState.todos.isNotEmpty)
-                ListView.builder(
-                    itemCount: appState.todos.length,
-                    itemBuilder: (context, index) => SizedBox(
-                          height: 500,
-                          child: Todo(todo: appState.todos.elementAt(index)),
-                        )),
-            ],
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text(
+            'You have '
+            '${appState.todos.length} TODOs:',
+            textAlign: TextAlign.center,
           ),
         ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: appState.todos.length,
+            itemBuilder: (context, index) => Todo(
+              todo: appState.todos.elementAt(index),
+              deleteTodo: () {
+                setState(() {
+                  appState.todos.remove(appState.todos.elementAt(index));
+                });
+              },
+              moveToDone: () {
+                setState(() {
+                  appState.done.add(appState.todos.elementAt(index));
+                  appState.todos.remove(appState.todos.elementAt(index));
+                });
+              },
+            ),
+          ),
+        )
       ]),
+    );
+  }
+}
+
+class DonePage extends StatefulWidget {
+  const DonePage({super.key});
+
+  @override
+  State<DonePage> createState() => _DonePageState();
+}
+
+class _DonePageState extends State<DonePage> {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return Column(
+      children: [
+        Text('You have done ${appState.done.length} TODOs!',
+            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20)),
+        Expanded(
+          child: ListView.builder(
+              itemCount: appState.done.length,
+              itemBuilder: (context, index) => ListTile(
+                    leading: Icon(
+                      Icons.done,
+                      color:
+                          appState.isDarkTheme ? Colors.purple : Colors.green,
+                    ),
+                    title: Text(appState.done.elementAt(index)),
+                  )),
+        )
+      ],
     );
   }
 }
@@ -183,7 +232,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final pages = [TodoPage(), const Placeholder(), SettingsPage()];
+  final pages = [TodoPage(), DonePage(), SettingsPage()];
 
   @override
   Widget build(BuildContext context) {
@@ -208,8 +257,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 onDestinationSelected: (int newIndex) {
                   setState(() {
                     appState.selectedPageIndex = newIndex;
-                    if (newIndex >= pages.length)
+                    if (newIndex >= pages.length) {
                       throw "there is no page for $newIndex";
+                    }
                   });
                 },
                 backgroundColor: Theme.of(context).colorScheme.primaryContainer,
