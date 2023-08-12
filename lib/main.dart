@@ -70,26 +70,33 @@ class EnterTodoCard extends StatelessWidget {
                   width: 180,
                   height: 45,
                   child: TextFormField(
+                      focusNode: appState.titleFieldFocus,
                       controller: appState.newTodoTitleController,
                       decoration: const InputDecoration(
                         border: UnderlineInputBorder(),
                         hintText: 'Write your new TODO',
                       ),
                       onFieldSubmitted: (String? todoToAdd) {
-                        appState.addNewTodo();
+                        if (appState.newTodoTitleController.text.trim() != "") {
+                          appState.descriptionFieldFocus.requestFocus();
+                        } else {
+                          appState.titleFieldFocus.requestFocus();
+                        }
                       }))
             ],
           ),
           Expanded(
               child: TextFormField(
-                  controller: appState.newTodoDescriptionController,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    hintText: 'Describe what do you want to do',
-                  ),
-                  onFieldSubmitted: (String? todoToAdd) {
-                    appState.addNewTodo();
-                  }))
+            controller: appState.newTodoDescriptionController,
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              hintText: 'Describe what do you want to do',
+            ),
+            onFieldSubmitted: (String? todoToAdd) {
+              appState.addNewTodo();
+            },
+            focusNode: appState.descriptionFieldFocus,
+          ))
         ],
       ),
     );
@@ -102,6 +109,9 @@ class MyAppState extends ChangeNotifier {
 
   TextEditingController newTodoTitleController = TextEditingController();
   TextEditingController newTodoDescriptionController = TextEditingController();
+
+  FocusNode descriptionFieldFocus = FocusNode();
+  FocusNode titleFieldFocus = FocusNode();
 
   bool isDarkTheme = false;
   var selectedPageIndex = 0;
