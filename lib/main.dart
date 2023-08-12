@@ -29,21 +29,95 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class TodoInfo {
+  String title;
+  String description;
+
+  TodoInfo({required this.title, required this.description});
+}
+
+class EnterTodoCard extends StatelessWidget {
+  const EnterTodoCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return Container(
+      width: 320,
+      height: 130,
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color.fromARGB(255, 0, 26, 255),
+          width: 2,
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.today),
+                onPressed: () {},
+                padding: const EdgeInsets.only(right: 10, top: 15),
+                iconSize: 35,
+              ),
+              SizedBox(
+                  width: 180,
+                  height: 45,
+                  child: TextFormField(
+                      controller: appState.newTodoTitleController,
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+                        hintText: 'Write your new TODO',
+                      ),
+                      onFieldSubmitted: (String? todoToAdd) {
+                        appState.addNewTodo();
+                      }))
+            ],
+          ),
+          Expanded(
+              child: TextFormField(
+                  controller: appState.newTodoDescriptionController,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    hintText: 'Describe what do you want to do',
+                  ),
+                  onFieldSubmitted: (String? todoToAdd) {
+                    appState.addNewTodo();
+                  }))
+        ],
+      ),
+    );
+  }
+}
+
 class MyAppState extends ChangeNotifier {
-  var selectedPageIndex = 0;
-  Set<dynamic> todos = {};
-  Set<dynamic> done = {};
-  TextEditingController newTodoController = TextEditingController();
+  Set<TodoInfo> todos = {};
+  Set<TodoInfo> done = {};
+
+  TextEditingController newTodoTitleController = TextEditingController();
+  TextEditingController newTodoDescriptionController = TextEditingController();
+
   bool isDarkTheme = false;
+  var selectedPageIndex = 0;
 
   void addNewTodo() {
-    var todoToAdd = newTodoController.text.trim();
+    var todoTitle = newTodoTitleController.text.trim();
+    var todoDescription = newTodoDescriptionController.text.trim();
 
-    if (todoToAdd != "") {
+    var todoToAdd = TodoInfo(title: todoTitle, description: todoDescription);
+
+    if (todoToAdd.title != "") {
       todos.add(todoToAdd);
     }
 
-    newTodoController.clear();
+    newTodoTitleController.clear();
+    newTodoDescriptionController.clear();
     notifyListeners();
   }
 
@@ -55,9 +129,9 @@ class MyAppState extends ChangeNotifier {
 }
 
 class Todo extends StatelessWidget {
-  final String todo;
+  final TodoInfo todo;
 
-  Todo(
+  const Todo(
       {required this.todo, required this.deleteTodo, required this.moveToDone});
 
   final void Function() moveToDone;
@@ -69,7 +143,8 @@ class Todo extends StatelessWidget {
     return ListTile(
         leading:
             const Icon(Icons.today, color: Color.fromARGB(255, 0, 94, 255)),
-        title: Text(todo),
+        title: Text(todo.title),
+        subtitle: Text(todo.description),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -106,19 +181,7 @@ class _TodoPageState extends State<TodoPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 200,
-                child: TextFormField(
-                  controller: appState.newTodoController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Write your new TODO',
-                  ),
-                  onFieldSubmitted: (String? todoToAdd) {
-                    appState.addNewTodo();
-                  },
-                ),
-              ),
+              const EnterTodoCard(),
               const SizedBox(
                 width: 10,
               ),
@@ -176,7 +239,7 @@ class _DonePageState extends State<DonePage> {
     return Column(
       children: [
         Text('You have done ${appState.done.length} TODOs!',
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20)),
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20)),
         Expanded(
           child: ListView.builder(
               itemCount: appState.done.length,
@@ -186,7 +249,8 @@ class _DonePageState extends State<DonePage> {
                       color:
                           appState.isDarkTheme ? Colors.purple : Colors.green,
                     ),
-                    title: Text(appState.done.elementAt(index)),
+                    title: Text(appState.done.elementAt(index).title),
+                    subtitle: Text(appState.done.elementAt(index).description),
                   )),
         )
       ],
@@ -232,7 +296,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final pages = [TodoPage(), DonePage(), SettingsPage()];
+  final pages = [TodoPage(), const DonePage(), SettingsPage()];
 
   @override
   Widget build(BuildContext context) {
