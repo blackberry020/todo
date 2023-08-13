@@ -212,32 +212,63 @@ class _TodoPageState extends State<TodoPage> {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
 
+    List<Widget> enterAndEditButtons = [
+      const EnterTodoCard(),
+      const SizedBox(
+        width: 10,
+      ),
+      ElevatedButton(
+        onPressed: appState.addNewTodo,
+        child: const Text('Add'),
+      ),
+      IconButton(
+        onPressed: () {
+          setState(() {
+            appState.isEditMode = !appState.isEditMode;
+          });
+        },
+        icon: const Icon(Icons.edit),
+        color: Colors.indigo,
+        iconSize: 30,
+      )
+    ];
+
+    if (appState.isEditMode) {
+      enterAndEditButtons.removeLast();
+
+      enterAndEditButtons.addAll([
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.done),
+          color: Colors.green,
+          iconSize: 30,
+        ),
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.delete),
+          color: Colors.red,
+          iconSize: 30,
+        ),
+        IconButton(
+          onPressed: () {
+            setState(() {
+              appState.isEditMode = !appState.isEditMode;
+            });
+          },
+          icon: const Icon(Icons.cancel),
+          color: Colors.red,
+          iconSize: 30,
+        ),
+      ]);
+    }
+
     return Scaffold(
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const EnterTodoCard(),
-              const SizedBox(
-                width: 10,
-              ),
-              ElevatedButton(
-                onPressed: appState.addNewTodo,
-                child: const Text('Add'),
-              ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    appState.isEditMode = !appState.isEditMode;
-                  });
-                },
-                icon: const Icon(Icons.edit),
-                color: Colors.indigo,
-                iconSize: 30,
-              )
-            ],
+            children: enterAndEditButtons,
           ),
         ),
         Padding(
