@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -104,16 +104,19 @@ class EnterTodoCard extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  Set<TodoInfo> todos = {};
-  Set<TodoInfo> done = {};
-
   TextEditingController newTodoTitleController = TextEditingController();
   TextEditingController newTodoDescriptionController = TextEditingController();
 
   FocusNode descriptionFieldFocus = FocusNode();
   FocusNode titleFieldFocus = FocusNode();
 
+  Set<TodoInfo> todos = {};
+  Set<TodoInfo> done = {};
+  Set<int> todosToDeleteIndexes = {};
+
   bool isDarkTheme = false;
+  bool isEditMode = false;
+
   var selectedPageIndex = 0;
 
   void addNewTodo() {
@@ -138,7 +141,7 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-class Todo extends StatelessWidget {
+class Todo extends StatefulWidget {
   final TodoInfo todo;
 
   const Todo(
@@ -149,27 +152,52 @@ class Todo extends StatelessWidget {
   final void Function() deleteTodo;
 
   @override
+  State<Todo> createState() => _TodoState();
+}
+
+class _TodoState extends State<Todo> {
+  bool isSelected = false;
+
+  @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    List<Widget> buttons = [];
+
+    if (appState.isEditMode) {
+      buttons = [
+        Checkbox(
+          value: isSelected,
+          onChanged: (bool? value) {
+            setState(() {
+              isSelected = value!;
+            });
+          },
+        )
+      ];
+    } else {
+      buttons = [
+        IconButton(
+          onPressed: widget.moveToDone,
+          icon: const Icon(
+            Icons.done,
+            color: Colors.green,
+          ),
+        ),
+        IconButton(
+          onPressed: widget.deleteTodo,
+          icon: const Icon(Icons.delete, color: Colors.red),
+        ),
+      ];
+    }
+
     return ListTile(
         leading:
             const Icon(Icons.today, color: Color.fromARGB(255, 0, 94, 255)),
-        title: Text(todo.title),
-        subtitle: Text(todo.description),
+        title: Text(widget.todo.title),
+        subtitle: Text(widget.todo.description),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              onPressed: moveToDone,
-              icon: const Icon(
-                Icons.done,
-                color: Colors.green,
-              ),
-            ),
-            IconButton(
-              onPressed: deleteTodo,
-              icon: const Icon(Icons.delete, color: Colors.red),
-            ),
-          ],
+          children: buttons,
         ));
   }
 }
@@ -198,6 +226,16 @@ class _TodoPageState extends State<TodoPage> {
               ElevatedButton(
                 onPressed: appState.addNewTodo,
                 child: const Text('Add'),
+              ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    appState.isEditMode = !appState.isEditMode;
+                  });
+                },
+                icon: const Icon(Icons.delete),
+                color: Colors.red,
+                iconSize: 30,
               )
             ],
           ),
