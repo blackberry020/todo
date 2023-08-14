@@ -215,14 +215,8 @@ class TodoPage extends StatefulWidget {
 
 class _TodoPageState extends State<TodoPage> {
   Widget getEditModeButtons(MyAppState appState) {
-    return Row(
+    return Column(
       children: [
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.done),
-          color: Colors.green,
-          iconSize: 30,
-        ),
         IconButton(
           onPressed: () {},
           icon: const Icon(Icons.delete),
@@ -239,6 +233,12 @@ class _TodoPageState extends State<TodoPage> {
           color: Colors.red,
           iconSize: 30,
         ),
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.done),
+          color: Colors.green,
+          iconSize: 30,
+        ),
       ],
     );
   }
@@ -252,13 +252,20 @@ class _TodoPageState extends State<TodoPage> {
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const EnterTodoCard(),
-            const SizedBox(
-              width: 10,
-            ),
-            ElevatedButton(
-              onPressed: appState.addNewTodo,
-              child: const Text('Add'),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const EnterTodoCard(),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: appState.addNewTodo,
+                    child: const Text('Add'),
+                  ),
+                ],
+              ),
             ),
             appState.isEditMode
                 ? getEditModeButtons(appState)
