@@ -113,7 +113,7 @@ class MyAppState extends ChangeNotifier {
 
   Set<TodoInfo> todos = {};
   Set<TodoInfo> done = {};
-  Set<int> todosToDeleteIndexes = {};
+  Set<int> selectedTodosIndexes = {};
 
   bool isDarkTheme = false;
   bool isEditMode = false;
@@ -132,6 +132,17 @@ class MyAppState extends ChangeNotifier {
 
     newTodoTitleController.clear();
     newTodoDescriptionController.clear();
+    notifyListeners();
+  }
+
+  void moveSelectedToDone() {
+    for (var index in selectedTodosIndexes) {
+      done.add(todos.elementAt(index));
+      todos.remove(todos.elementAt(index));
+    }
+
+    selectedTodosIndexes.clear();
+
     notifyListeners();
   }
 
@@ -155,7 +166,7 @@ class Todo extends StatefulWidget {
 
   final void Function() deleteTodo;
 
-  final void Function() selectionChanged;
+  final void Function(bool) selectionChanged;
 
   @override
   State<Todo> createState() => _TodoState();
@@ -164,24 +175,20 @@ class Todo extends StatefulWidget {
 class _TodoState extends State<Todo> {
   bool isSelected = false;
 
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    List<Widget> buttons = [];
+  Widget getTodoEditButtons() {
+    return Checkbox(
+      value: isSelected,
+      onChanged: (bool? value) {
+        setState(() {
+          isSelected = value!;
+        });
+      },
+    );
+  }
 
-    if (appState.isEditMode) {
-      buttons = [
-        Checkbox(
-          value: isSelected,
-          onChanged: (bool? value) {
-            setState(() {
-              isSelected = value!;
-            });
-          },
-        )
-      ];
-    } else {
-      buttons = [
+  Widget getTodoMainButtons() {
+    return Row(
+      children: [
         IconButton(
           onPressed: widget.moveToDone,
           icon: const Icon(
@@ -193,8 +200,13 @@ class _TodoState extends State<Todo> {
           onPressed: widget.deleteTodo,
           icon: const Icon(Icons.delete, color: Colors.red),
         ),
-      ];
-    }
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
 
     return ListTile(
         leading:
@@ -203,7 +215,9 @@ class _TodoState extends State<Todo> {
         subtitle: Text(widget.todo.description),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
-          children: buttons,
+          children: [
+            appState.isEditMode ? getTodoEditButtons() : getTodoMainButtons()
+          ],
         ));
   }
 }
@@ -234,7 +248,12 @@ class _TodoPageState extends State<TodoPage> {
           iconSize: 30,
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            setState(() {
+              appState.moveSelectedToDone();
+              appState.isEditMode = false;
+            });
+          },
           icon: const Icon(Icons.done),
           color: Colors.green,
           iconSize: 30,
@@ -310,7 +329,13 @@ class _TodoPageState extends State<TodoPage> {
                   appState.todos.remove(appState.todos.elementAt(index));
                 });
               },
-              selectionChanged: () {},
+              selectionChanged: (bool isSelected) {
+                if (isSelected) {
+                  appState.selectedTodosIndexes.add(index);
+                } else {
+                  appState.selectedTodosIndexes.remove(index);
+                }
+              },
             ),
           ),
         )
