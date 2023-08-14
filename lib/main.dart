@@ -62,6 +62,7 @@ class EnterTodoCard extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.today),
+                color: Colors.indigo,
                 onPressed: () {},
                 padding: const EdgeInsets.only(right: 10, top: 15),
                 iconSize: 35,
@@ -145,11 +146,16 @@ class Todo extends StatefulWidget {
   final TodoInfo todo;
 
   const Todo(
-      {required this.todo, required this.deleteTodo, required this.moveToDone});
+      {required this.todo,
+      required this.deleteTodo,
+      required this.moveToDone,
+      required this.selectionChanged});
 
   final void Function() moveToDone;
 
   final void Function() deleteTodo;
+
+  final void Function() selectionChanged;
 
   @override
   State<Todo> createState() => _TodoState();
@@ -208,35 +214,9 @@ class TodoPage extends StatefulWidget {
 }
 
 class _TodoPageState extends State<TodoPage> {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    List<Widget> enterAndEditButtons = [
-      const EnterTodoCard(),
-      const SizedBox(
-        width: 10,
-      ),
-      ElevatedButton(
-        onPressed: appState.addNewTodo,
-        child: const Text('Add'),
-      ),
-      IconButton(
-        onPressed: () {
-          setState(() {
-            appState.isEditMode = !appState.isEditMode;
-          });
-        },
-        icon: const Icon(Icons.edit),
-        color: Colors.indigo,
-        iconSize: 30,
-      )
-    ];
-
-    if (appState.isEditMode) {
-      enterAndEditButtons.removeLast();
-
-      enterAndEditButtons.addAll([
+  Widget getEditModeButtons(MyAppState appState) {
+    return Row(
+      children: [
         IconButton(
           onPressed: () {},
           icon: const Icon(Icons.done),
@@ -259,23 +239,51 @@ class _TodoPageState extends State<TodoPage> {
           color: Colors.red,
           iconSize: 30,
         ),
-      ]);
-    }
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
 
     return Scaffold(
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: enterAndEditButtons,
-          ),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const EnterTodoCard(),
+            const SizedBox(
+              width: 10,
+            ),
+            ElevatedButton(
+              onPressed: appState.addNewTodo,
+              child: const Text('Add'),
+            ),
+            appState.isEditMode
+                ? getEditModeButtons(appState)
+                : IconButton(
+                    onPressed: () {
+                      setState(() {
+                        appState.isEditMode = !appState.isEditMode;
+                      });
+                    },
+                    icon: const Icon(Icons.edit),
+                    color: Colors.indigo,
+                    iconSize: 30,
+                  )
+          ]),
         ),
         Padding(
           padding: const EdgeInsets.all(20),
           child: Text(
-            'You have '
-            '${appState.todos.length} TODOs:',
+            appState.todos.length == 1
+                ? 'You have 1 TODO:'
+                : 'You have ${appState.todos.length} TODOs:',
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 17,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -295,6 +303,7 @@ class _TodoPageState extends State<TodoPage> {
                   appState.todos.remove(appState.todos.elementAt(index));
                 });
               },
+              selectionChanged: () {},
             ),
           ),
         )
