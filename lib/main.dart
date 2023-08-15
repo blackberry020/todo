@@ -136,10 +136,14 @@ class MyAppState extends ChangeNotifier {
   }
 
   void moveSelectedToDone() {
+    Set<TodoInfo> selectedTodos = {};
+
     for (var index in selectedTodosIndexes) {
-      done.add(todos.elementAt(index));
-      todos.remove(todos.elementAt(index));
+      selectedTodos.add(todos.elementAt(index));
     }
+
+    done.addAll(selectedTodos);
+    todos.removeAll(selectedTodos);
 
     selectedTodosIndexes.clear();
 
