@@ -181,6 +181,7 @@ class _TodoState extends State<Todo> {
       onChanged: (bool? value) {
         setState(() {
           isSelected = value!;
+          widget.selectionChanged(isSelected);
         });
       },
     );
