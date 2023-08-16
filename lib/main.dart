@@ -34,6 +34,12 @@ class TodoInfo {
   String description;
 
   TodoInfo({required this.title, required this.description});
+
+  @override
+  bool operator ==(Object other) => other is TodoInfo && other.title == title;
+
+  @override
+  int get hashCode => Object.hash(title, description);
 }
 
 class EnterTodoCard extends StatelessWidget {
@@ -95,6 +101,7 @@ class EnterTodoCard extends StatelessWidget {
             ),
             onFieldSubmitted: (String? todoToAdd) {
               appState.addNewTodo();
+              appState.titleFieldFocus.requestFocus();
             },
             focusNode: appState.descriptionFieldFocus,
           ))
@@ -143,6 +150,20 @@ class MyAppState extends ChangeNotifier {
     }
 
     done.addAll(selectedTodos);
+    todos.removeAll(selectedTodos);
+
+    selectedTodosIndexes.clear();
+
+    notifyListeners();
+  }
+
+  void deleteSelected() {
+    Set<TodoInfo> selectedTodos = {};
+
+    for (var index in selectedTodosIndexes) {
+      selectedTodos.add(todos.elementAt(index));
+    }
+
     todos.removeAll(selectedTodos);
 
     selectedTodosIndexes.clear();
@@ -237,7 +258,11 @@ class _TodoPageState extends State<TodoPage> {
     return Column(
       children: [
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            setState(() {
+              appState.deleteSelected();
+            });
+          },
           icon: const Icon(Icons.delete),
           color: Colors.red,
           iconSize: 30,
@@ -257,6 +282,7 @@ class _TodoPageState extends State<TodoPage> {
             setState(() {
               appState.moveSelectedToDone();
               appState.isEditMode = false;
+              print("try to done selected");
             });
           },
           icon: const Icon(Icons.done),
