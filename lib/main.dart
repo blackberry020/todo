@@ -39,7 +39,7 @@ class TodoInfo {
   bool operator ==(Object other) => other is TodoInfo && other.title == title;
 
   @override
-  int get hashCode => Object.hash(title, description);
+  int get hashCode => Object.hash(title, title);
 }
 
 class EnterTodoCard extends StatelessWidget {
