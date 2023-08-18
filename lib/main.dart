@@ -120,7 +120,7 @@ class MyAppState extends ChangeNotifier {
 
   Set<TodoInfo> todos = {};
   Set<TodoInfo> done = {};
-  Set<int> selectedTodosIndexes = {};
+  Set<TodoInfo> selectedTodos = {};
 
   bool isDarkTheme = false;
   bool isEditMode = false;
@@ -143,30 +143,16 @@ class MyAppState extends ChangeNotifier {
   }
 
   void moveSelectedToDone() {
-    Set<TodoInfo> selectedTodos = {};
-
-    for (var index in selectedTodosIndexes) {
-      selectedTodos.add(todos.elementAt(index));
-    }
-
     done.addAll(selectedTodos);
     todos.removeAll(selectedTodos);
-
-    selectedTodosIndexes.clear();
+    selectedTodos.clear();
 
     notifyListeners();
   }
 
   void deleteSelected() {
-    Set<TodoInfo> selectedTodos = {};
-
-    for (var index in selectedTodosIndexes) {
-      selectedTodos.add(todos.elementAt(index));
-    }
-
     todos.removeAll(selectedTodos);
-
-    selectedTodosIndexes.clear();
+    selectedTodos.clear();
 
     notifyListeners();
   }
@@ -180,12 +166,14 @@ class MyAppState extends ChangeNotifier {
 
 class Todo extends StatefulWidget {
   final TodoInfo todo;
+  var appState;
 
-  const Todo(
+  Todo(
       {required this.todo,
       required this.deleteTodo,
       required this.moveToDone,
-      required this.selectionChanged});
+      required this.selectionChanged,
+      required this.appState});
 
   final void Function() moveToDone;
 
@@ -198,15 +186,12 @@ class Todo extends StatefulWidget {
 }
 
 class _TodoState extends State<Todo> {
-  bool isSelected = false;
-
   Widget getTodoEditButtons() {
     return Checkbox(
-      value: isSelected,
+      value: widget.appState.selectedTodos.contains(widget.todo),
       onChanged: (bool? value) {
         setState(() {
-          isSelected = value!;
-          widget.selectionChanged(isSelected);
+          widget.selectionChanged(value!);
         });
       },
     );
@@ -261,6 +246,7 @@ class _TodoPageState extends State<TodoPage> {
           onPressed: () {
             setState(() {
               appState.deleteSelected();
+              appState.isEditMode = false;
             });
           },
           icon: const Icon(Icons.delete),
@@ -270,7 +256,8 @@ class _TodoPageState extends State<TodoPage> {
         IconButton(
           onPressed: () {
             setState(() {
-              appState.isEditMode = !appState.isEditMode;
+              appState.selectedTodos.clear();
+              appState.isEditMode = false;
             });
           },
           icon: const Icon(Icons.cancel),
@@ -282,7 +269,6 @@ class _TodoPageState extends State<TodoPage> {
             setState(() {
               appState.moveSelectedToDone();
               appState.isEditMode = false;
-              print("try to done selected");
             });
           },
           icon: const Icon(Icons.done),
@@ -348,6 +334,7 @@ class _TodoPageState extends State<TodoPage> {
           child: ListView.builder(
             itemCount: appState.todos.length,
             itemBuilder: (context, index) => Todo(
+              appState: appState,
               todo: appState.todos.elementAt(index),
               deleteTodo: () {
                 setState(() {
@@ -362,9 +349,10 @@ class _TodoPageState extends State<TodoPage> {
               },
               selectionChanged: (bool isSelected) {
                 if (isSelected) {
-                  appState.selectedTodosIndexes.add(index);
+                  appState.selectedTodos.add(appState.todos.elementAt(index));
                 } else {
-                  appState.selectedTodosIndexes.remove(index);
+                  appState.selectedTodos
+                      .remove(appState.todos.elementAt(index));
                 }
               },
             ),
