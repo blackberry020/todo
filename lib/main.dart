@@ -166,7 +166,7 @@ class MyAppState extends ChangeNotifier {
 
 class Todo extends StatefulWidget {
   final TodoInfo todo;
-  var appState;
+  final MyAppState appState;
 
   Todo(
       {required this.todo,
@@ -186,6 +186,8 @@ class Todo extends StatefulWidget {
 }
 
 class _TodoState extends State<Todo> {
+  bool isHover = false;
+
   Widget getTodoEditButtons() {
     return Checkbox(
       value: widget.appState.selectedTodos.contains(widget.todo),
@@ -219,17 +221,31 @@ class _TodoState extends State<Todo> {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
 
-    return ListTile(
-        leading:
-            const Icon(Icons.today, color: Color.fromARGB(255, 0, 94, 255)),
-        title: Text(widget.todo.title),
-        subtitle: Text(widget.todo.description),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            appState.isEditMode ? getTodoEditButtons() : getTodoMainButtons()
-          ],
-        ));
+    return Container(
+      height: 100,
+      color: Colors.deepPurpleAccent,
+      child: InkWell(
+        onHover: (bool val) {
+          setState(() {
+            isHover = val;
+            print("changed");
+          });
+        },
+        child: ListTile(
+            leading:
+                const Icon(Icons.today, color: Color.fromARGB(255, 0, 94, 255)),
+            title: Text(widget.todo.title),
+            subtitle: Text(widget.todo.description),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                appState.isEditMode
+                    ? getTodoEditButtons()
+                    : (isHover ? getTodoMainButtons() : const SizedBox())
+              ],
+            )),
+      ),
+    );
   }
 }
 
