@@ -57,7 +57,7 @@ class EnterTodoCard extends StatelessWidget {
             controller: appState.newTodoDescriptionController,
             decoration: const InputDecoration(
               border: UnderlineInputBorder(),
-              hintText: 'Describe what do you want to do',
+              hintText: 'Describe your task',
             ),
             onFieldSubmitted: (String? todoToAdd) {
               appState.addNewTodo();
